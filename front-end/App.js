@@ -3,7 +3,7 @@ import { Platform, StyleSheet, Text, View, Pressable } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import Ionicons from 'react-native-vector-icons/MaterialIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 import Home from './screens/Home';
@@ -39,13 +39,13 @@ export default function App() {
           })}
         >
           <Tab.Screen
-            name="Test"
+            name="Home"
             component={Home}
             options={{
               headerTransparent: true,
               headerTitleAlign: 'center',
               tabBarIcon: ({ color, size }) => (
-                <Ionicons name="home" color={color} size={30} />
+                <MaterialIcons name="home" color={color} size={30} />
               ),
               headerTitle: (props) => <HomeHeaderTitle {...props} />,
             }}
