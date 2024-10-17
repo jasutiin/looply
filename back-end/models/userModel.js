@@ -26,24 +26,41 @@ const userSchema = new mongoose.Schema({
   },
   followersAmount: {
     type: Number,
-    required: true,
     default: 0,
   },
   followingAmount: {
     type: Number,
-    required: true,
     default: 0,
   },
   totalLikesAmount: {
     type: Number,
-    required: true,
     default: 0,
   },
-  likedVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
-  createdVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
-  savedVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
-  followersList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  followingList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  likedVideos: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Video',
+    default: [],
+  },
+  createdVideos: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Video',
+    default: [],
+  },
+  savedVideos: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Video',
+    default: [],
+  },
+  followersList: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  },
+  followingList: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  },
 });
 
 const User = mongoose.model('User', userSchema);

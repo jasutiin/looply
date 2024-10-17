@@ -19,24 +19,36 @@ const videoSchema = new mongoose.Schema({
     enum: ['public', 'private'],
     default: 'public',
   },
-  viewAmount: {
+  views: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  },
+  viewsAmount: {
     type: Number,
-    required: true,
     default: 0,
+  },
+  likes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
   },
   likesAmount: {
     type: Number,
-    required: true,
     default: 0,
   },
   commentsAmount: {
+    // list of comments can be received by filtering by vid id in comments collection
     type: Number,
-    required: true,
     default: 0,
+  },
+  saves: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Comment',
+    default: [],
   },
   savesAmount: {
     type: Number,
-    required: true,
     default: 0,
   },
 });
