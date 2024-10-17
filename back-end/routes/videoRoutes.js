@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const VideoModel = require('../models/videoModel');
 
-//Post Method
+// for posting a video
 router.post('/post', async (req, res) => {
   try {
     const dataToSave = await VideoModel.create(req.body);
@@ -14,17 +14,7 @@ router.post('/post', async (req, res) => {
   }
 });
 
-//Get all Method
-router.get('/getAll', async (req, res) => {
-  try {
-    const data = await VideoModel.find();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-//Get by ID Method
+// when clicking on video from profile
 router.get('/getOne/:id', async (req, res) => {
   try {
     const data = await VideoModel.findById(req.params.id);
@@ -34,16 +24,7 @@ router.get('/getOne/:id', async (req, res) => {
   }
 });
 
-//Get random Method
-router.get('/getRandom', async (req, res) => {
-  try {
-    const data = await VideoModel.aggregate([{ $sample: { size: 1 } }]);
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
+// for lazy loading in home screen while scrolling
 router.get('/getRandomSix', async (req, res) => {
   try {
     const data = await VideoModel.aggregate([{ $sample: { size: 6 } }]);
