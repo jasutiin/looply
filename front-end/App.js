@@ -65,7 +65,14 @@ export default function App() {
             name="Profile"
             component={Profile}
             options={{
-              headerTransparent: true,
+              headerTransparent: false,
+              headerTitleAlign: 'center',
+              headerTintColor: 'white',
+              headerStyle: {
+                backgroundColor: '#121212',
+                shadowColor: 'transparent',
+                elevation: 0,
+              },
               tabBarIcon: ({ color, size }) => (
                 <FontAwesome6 name="user-large" color={color} size={22} />
               ),
