@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const mongoString = process.env.DATABASE_URL;
+const databaseName = process.env.DATABASE_NAME;
 
 const videoRoutes = require('./routes/videoRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -20,7 +21,7 @@ app.use('/video', videoRoutes);
 app.use('/user', userRoutes);
 app.use('/comment', commentRoutes);
 
-mongoose.connect(mongoString);
+mongoose.connect(mongoString, { dbName: databaseName });
 const database = mongoose.connection;
 
 database.on('error', (error) => {
