@@ -3,27 +3,41 @@
 const express = require('express');
 const router = express.Router();
 const CommentModel = require('../models/commentModel');
+const VideoModel = require('../models/videoModel');
 
 router.post('/createNewComment', async (req, res) => {
   try {
-    const newComment = await CommentModel.create(req.body);
-    res.status(201).json(newComment);
+    const { videoId } = req.body;
+    const newComment = await CommentModel.create(videoId);
+
+    // add comment to list of comments in video
+    const video = await VideoModel.findByIdAndUpdate(videoId, {
+      $push: { comments: newComment._id },
+      $inc: { commentsCount: 1 },
+    });
+
+    res.status(201).json({ newComment, video });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-router.delete('/deleteComment/:id', async (req, res) => {
+router.post('/deleteComment', async (req, res) => {
   try {
-    const comment = await CommentModel.findByIdAndDelete(req.params.id);
+    const { commentId, videoId } = req.body;
 
-    if (!comment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
+    // remove comment from videos
+    const video = await VideoModel.findByIdAndUpdate(videoId, {
+      $pull: { comments: commentId },
+      $inc: { commentsCount: -1 },
+    });
 
-    res.status(200).json({ message: 'Comment deleted successfully' });
+    // deleting comment from database
+    const comment = await CommentModel.findByIdAndDelete(commentId);
+
+    res.status(201).json({ comment, video });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
