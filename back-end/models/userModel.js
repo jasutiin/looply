@@ -28,15 +28,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ' ',
   },
-  followersAmount: {
+  followersCount: {
     type: Number,
     default: 0,
   },
-  followingAmount: {
+  followingCount: {
     type: Number,
     default: 0,
   },
-  totalLikesAmount: {
+  likesCount: {
     type: Number,
     default: 0,
   },

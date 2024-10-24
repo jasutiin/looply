@@ -24,7 +24,7 @@ const videoSchema = new mongoose.Schema({
     ref: 'User',
     default: [],
   },
-  viewsAmount: {
+  viewsCount: {
     type: Number,
     default: 0,
   },
@@ -33,21 +33,26 @@ const videoSchema = new mongoose.Schema({
     ref: 'User',
     default: [],
   },
-  likesAmount: {
+  likesCount: {
     type: Number,
     default: 0,
   },
-  commentsAmount: {
+  comments: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Comment',
+    default: [],
+  },
+  commentsCount: {
     // list of comments can be received by filtering by vid id in comments collection
     type: Number,
     default: 0,
   },
   saves: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Comment',
+    ref: 'User',
     default: [],
   },
-  savesAmount: {
+  savesCount: {
     type: Number,
     default: 0,
   },

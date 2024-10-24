@@ -5,7 +5,7 @@ const router = express.Router();
 const VideoModel = require('../models/videoModel');
 
 // for posting a video
-router.post('/post', async (req, res) => {
+router.post('/postVideo', async (req, res) => {
   try {
     const dataToSave = await VideoModel.create(req.body);
     res.status(200).json(dataToSave);
@@ -15,7 +15,7 @@ router.post('/post', async (req, res) => {
 });
 
 // when clicking on video from profile
-router.get('/getOne/:id', async (req, res) => {
+router.get('/getVideo/:id', async (req, res) => {
   try {
     const data = await VideoModel.findById(req.params.id);
     res.json(data);
@@ -25,7 +25,17 @@ router.get('/getOne/:id', async (req, res) => {
 });
 
 // for lazy loading in home screen while scrolling
-router.get('/getRandomSix', async (req, res) => {
+router.get('/getAllVideos', async (req, res) => {
+  try {
+    const data = await VideoModel.find();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// for lazy loading in home screen while scrolling
+router.get('/getSixRandomVideos', async (req, res) => {
   try {
     const data = await VideoModel.aggregate([{ $sample: { size: 6 } }]);
     res.json(data);
@@ -34,14 +44,193 @@ router.get('/getRandomSix', async (req, res) => {
   }
 });
 
-//Update by ID Method
-router.patch('/update/:id', (req, res) => {
-  res.send('Update by ID API');
+router.patch('/updateDescription/:id', async (req, res) => {
+  try {
+    const { description } = req.body;
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      { description },
+      { new: true }
+    );
+    res.status(200).json(video);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
-//Delete by ID Method
-router.delete('/delete/:id', (req, res) => {
-  res.send('Delete by ID API');
+router.patch('/updatePrivacy/:id', async (req, res) => {
+  try {
+    const { privacy } = req.body;
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      { privacy },
+      { new: true }
+    );
+    res.status(200).json(video);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.patch('/handleView/:id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { views: userId },
+        $inc: { viewsCount: 1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/addLike/:id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { likes: userId },
+        $inc: { likesCount: 1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/removeLike/:id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { likes: userId },
+        $inc: { likesCount: -1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/addSave/:id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { saves: userId },
+        $inc: { savesCount: 1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/removeSave/:id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { saves: userId },
+        $inc: { savesCount: -1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/addComment/:id', async (req, res) => {
+  try {
+    const { commentId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { comments: commentId },
+        $inc: { commentsCount: 1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/removeComment/:id', async (req, res) => {
+  try {
+    const { commentId } = req.body;
+
+    const video = await VideoModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { comments: commentId },
+        $inc: { commentsCount: -1 },
+      },
+      { new: true }
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
 
 module.exports = router;
