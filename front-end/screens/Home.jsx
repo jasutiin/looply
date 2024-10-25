@@ -10,13 +10,13 @@ const windowHeight = Dimensions.get('window').height;
 function Home() {
   const [videoList, setVideoList] = useState([]);
 
-  const getSixVideoUrls = async () => {
+  const getSixVideos = async () => {
     const arr = [];
     await axios
-      .get(ADDR)
+      .get(`${ADDR}/video/getSixRandomVideos`)
       .then((response) => {
         response.data.forEach((video) => {
-          arr.push(video.vidUrl);
+          arr.push(video);
           console.log(video.vidUrl);
         });
       })
@@ -27,7 +27,7 @@ function Home() {
   };
 
   const handleLoadMore = async () => {
-    const urls = await getSixVideoUrls();
+    const urls = await getSixVideos();
     setVideoList((prevList) => [...prevList, ...urls]);
   };
 
@@ -39,7 +39,7 @@ function Home() {
     <View style={styles.container}>
       <FlatList
         data={videoList}
-        renderItem={({ item }) => <VideoItem url={item} />}
+        renderItem={({ item }) => <VideoItem videoItem={item} />}
         showsVerticalScrollIndicator={false}
         style={styles.list}
         snapToInterval={windowHeight} // Snap to each item (height of screen)

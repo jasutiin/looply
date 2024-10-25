@@ -9,7 +9,7 @@ import FontAwesome6 from 'react-native-vector-icons/Ionicons';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-function VideoItem({ url, likes }) {
+function VideoItem({ videoItem }) {
   const video = useRef(null);
   const [status, setStatus] = useState({});
 
@@ -19,7 +19,7 @@ function VideoItem({ url, likes }) {
         ref={video}
         style={styles.video}
         source={{
-          uri: url,
+          uri: videoItem.vidUrl,
         }}
         resizeMode={ResizeMode.COVER}
         isLooping
@@ -31,7 +31,7 @@ function VideoItem({ url, likes }) {
       <View style={styles.overlay}>
         <View style={styles.overlayItem}>
           <Octicons name="heart-fill" color="white" size={30} />
-          <Text style={styles.overlayText}>1000</Text>
+          <Text style={styles.overlayText}>{videoItem.likesCount}</Text>
         </View>
         <View style={styles.overlayItem}>
           <MaterialCommunityIcons
@@ -39,11 +39,11 @@ function VideoItem({ url, likes }) {
             color="white"
             size={30}
           />
-          <Text style={styles.overlayText}>1000</Text>
+          <Text style={styles.overlayText}>{videoItem.commentsCount}</Text>
         </View>
         <View style={styles.overlayItem}>
           <FontAwesome6 name="bookmark" color="white" size={30} />
-          <Text style={styles.overlayText}>1000</Text>
+          <Text style={styles.overlayText}>{videoItem.savesCount}</Text>
         </View>
       </View>
     </View>
@@ -71,6 +71,8 @@ const styles = StyleSheet.create({
   },
   overlayItem: {
     margin: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   overlayText: {
     color: 'white',
