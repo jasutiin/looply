@@ -19,7 +19,8 @@ function VideoItem({ videoItem }) {
         ref={video}
         style={styles.video}
         source={{
-          uri: videoItem.vidUrl,
+          // uri: videoItem.vidUrl,
+          uri: null,
         }}
         resizeMode={ResizeMode.COVER}
         isLooping

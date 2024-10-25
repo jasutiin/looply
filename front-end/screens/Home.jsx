@@ -13,7 +13,7 @@ function Home() {
   const getSixVideos = async () => {
     const arr = [];
     await axios
-      .get(`${ADDR}/video/getSixRandomVideos`)
+      .get(null)
       .then((response) => {
         response.data.forEach((video) => {
           arr.push(video);

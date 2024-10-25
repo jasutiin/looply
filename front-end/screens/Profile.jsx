@@ -7,16 +7,17 @@ import {
   Dimensions,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import AuthenticationPage from '../components/AuthenticationPage';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from '../components/Login';
+import Signup from '../components/Signup';
 
 const windowWidth = Dimensions.get('window').width;
 
-signup = true;
+signup = false;
+const Stack = createStackNavigator();
 
 function Profile() {
-  function Test() {
-    console.log('hello');
-  }
-
   if (signup) {
     return (
       <View style={styles.container}>
@@ -50,13 +51,15 @@ function Profile() {
     );
   } else {
     return (
-      <View style={styles.container}>
-        <AntDesign name="user" color="grey" size={100} />
-        <Text style={styles.buttonText}>Log into existing account</Text>
-        <Pressable style={styles.button} onPress={Test}>
-          <Text style={styles.buttonText}>Login</Text>
-        </Pressable>
-      </View>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="Authentication" component={AuthenticationPage} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Signup" component={Signup} />
+      </Stack.Navigator>
     );
   }
 }
@@ -69,7 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
   },
   button: {
-    backgroundColor: '#FF3B5C',
+    backgroundColor: '#4493F8',
     borderRadius: 10,
     width: 200,
     height: 40,
@@ -82,6 +85,9 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#6c6c6c',
+  },
+  textBlue: {
+    color: '#4493F8',
   },
   profileContainer: {
     flex: 0.6,
@@ -125,6 +131,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: windowWidth,
+  },
+  login: {
+    flex: 0.9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signup: {
+    flex: 0.1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });
 
