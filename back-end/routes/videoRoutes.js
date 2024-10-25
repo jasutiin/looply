@@ -8,14 +8,42 @@ const UserModel = require('../models/userModel');
 // create a video then add it to list of videos user has
 router.post('/postVideo', async (req, res) => {
   try {
-    const { userId } = req.body; // userId of person posting the video
+    const { videoOwner } = req.body; // id of person posting the video
     const video = await VideoModel.create(req.body);
     const user = await UserModel.findByIdAndUpdate(
-      userId,
-      { $push: { createdVideos: video._id } },
+      videoOwner,
+      { $addToSet: { createdVideos: video._id } },
       { new: true }
     );
     res.status(200).json({ video, user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// delete video then remove it from list of videos user has
+router.delete('/deleteVideo/:id', async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const video = await VideoModel.findById(videoId);
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const videoOwner = video.videoOwner;
+
+    const user = await UserModel.findByIdAndUpdate(
+      videoOwner,
+      { $pull: { createdVideos: videoId } },
+      { new: true }
+    );
+
+    await VideoModel.findByIdAndDelete(videoId);
+
+    res
+      .status(200)
+      .json({ message: 'Video deleted successfully', video, user });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -78,11 +106,23 @@ router.patch('/updatePrivacy/:id', async (req, res) => {
   }
 });
 
+// handle viewing a video which adds the viewer to the list of viewers and increments the view count
 router.patch('/handleView/:id', async (req, res) => {
   try {
     const { viewerId } = req.body;
 
-    const video = await VideoModel.findByIdAndUpdate(
+    const video = await VideoModel.findById(req.params.id);
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (video.views.includes(viewerId)) {
+      return res
+        .status(400)
+        .json({ message: 'You have already viewed this video.' });
+    }
+
+    const updatedVideo = await VideoModel.findByIdAndUpdate(
       req.params.id,
       {
         $addToSet: { views: viewerId },
@@ -91,11 +131,7 @@ router.patch('/handleView/:id', async (req, res) => {
       { new: true }
     );
 
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json(video);
+    res.status(200).json(updatedVideo);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -106,10 +142,19 @@ router.patch('/handleView/:id', async (req, res) => {
 router.patch('/addLike/:id', async (req, res) => {
   try {
     const { viewerId } = req.body; // id of person doing the liking
-    const { posterId } = req.body; // id of person who posted the video
+    const video = await VideoModel.findById(req.params.id);
 
-    // add viewer to list of who liked the video, increment likes
-    const video = await VideoModel.findByIdAndUpdate(
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (video.likes.includes(viewerId)) {
+      return res
+        .status(400)
+        .json({ message: 'You have already liked this video.' });
+    }
+
+    await VideoModel.findByIdAndUpdate(
       req.params.id,
       {
         $addToSet: { likes: viewerId },
@@ -118,8 +163,20 @@ router.patch('/addLike/:id', async (req, res) => {
       { new: true }
     );
 
-    // add video to list of viewer's liked videos
-    const viewer = await UserModel.findByIdAndUpdate(
+    const videoOwner = video.videoOwner;
+    const viewer = await UserModel.findById(viewerId);
+
+    if (!viewer) {
+      return res.status(404).json({ message: 'Viewer not found' });
+    }
+
+    if (viewer.likedVideos.includes(video._id)) {
+      return res
+        .status(400)
+        .json({ message: 'Video is already in your liked videos.' });
+    }
+
+    await UserModel.findByIdAndUpdate(
       viewerId,
       {
         $addToSet: { likedVideos: video._id },
@@ -127,20 +184,15 @@ router.patch('/addLike/:id', async (req, res) => {
       { new: true }
     );
 
-    // increment poster's total like count
-    const poster = await UserModel.findByIdAndUpdate(
-      posterId,
+    await UserModel.findByIdAndUpdate(
+      videoOwner,
       {
         $inc: { likesCount: 1 },
       },
       { new: true }
     );
 
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json({ video, viewer, poster });
+    res.status(200).json({ message: 'Video liked successfully.' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -150,11 +202,20 @@ router.patch('/addLike/:id', async (req, res) => {
 // also decrements the video's and creator's like counts
 router.patch('/removeLike/:id', async (req, res) => {
   try {
-    const { viewerId } = req.body; // id of person doing the liking
-    const { posterId } = req.body; // id of person who posted the video
+    const { viewerId } = req.body; // id of person doing the unliking
+    const video = await VideoModel.findById(req.params.id);
 
-    // remove viewer from list of who liked the video, decrement likes
-    const video = await VideoModel.findByIdAndUpdate(
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (!video.likes.includes(viewerId)) {
+      return res
+        .status(400)
+        .json({ message: 'You have not liked this video yet.' });
+    }
+
+    await VideoModel.findByIdAndUpdate(
       req.params.id,
       {
         $pull: { likes: viewerId },
@@ -163,8 +224,8 @@ router.patch('/removeLike/:id', async (req, res) => {
       { new: true }
     );
 
-    // remove video from list of viewer's liked videos
-    const viewer = await UserModel.findByIdAndUpdate(
+    const videoOwner = video.videoOwner;
+    await UserModel.findByIdAndUpdate(
       viewerId,
       {
         $pull: { likedVideos: video._id },
@@ -172,20 +233,15 @@ router.patch('/removeLike/:id', async (req, res) => {
       { new: true }
     );
 
-    // decrement poster's total like count
-    const poster = await UserModel.findByIdAndUpdate(
-      posterId,
+    await UserModel.findByIdAndUpdate(
+      videoOwner,
       {
         $inc: { likesCount: -1 },
       },
       { new: true }
     );
 
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json({ video, viewer, poster });
+    res.status(200).json({ message: 'Video unliked successfully.' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -196,8 +252,19 @@ router.patch('/removeLike/:id', async (req, res) => {
 router.patch('/addSave/:id', async (req, res) => {
   try {
     const { viewerId } = req.body;
+    const video = await VideoModel.findById(req.params.id);
 
-    const video = await VideoModel.findByIdAndUpdate(
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (video.saves.includes(viewerId)) {
+      return res
+        .status(400)
+        .json({ message: 'You have already saved this video.' });
+    }
+
+    await VideoModel.findByIdAndUpdate(
       req.params.id,
       {
         $addToSet: { saves: viewerId },
@@ -206,7 +273,19 @@ router.patch('/addSave/:id', async (req, res) => {
       { new: true }
     );
 
-    const viewer = await UserModel.findByIdAndUpdate(
+    const viewer = await UserModel.findById(viewerId);
+
+    if (!viewer) {
+      return res.status(404).json({ message: 'Viewer not found' });
+    }
+
+    if (viewer.savedVideos.includes(video._id)) {
+      return res
+        .status(400)
+        .json({ message: 'Video is already in your saved videos.' });
+    }
+
+    await UserModel.findByIdAndUpdate(
       viewerId,
       {
         $addToSet: { savedVideos: video._id },
@@ -214,11 +293,9 @@ router.patch('/addSave/:id', async (req, res) => {
       { new: true }
     );
 
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json({ video, viewer });
+    res
+      .status(200)
+      .json({ message: 'Video saved successfully.', video, viewer });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -229,8 +306,19 @@ router.patch('/addSave/:id', async (req, res) => {
 router.patch('/removeSave/:id', async (req, res) => {
   try {
     const { viewerId } = req.body;
+    const video = await VideoModel.findById(req.params.id);
 
-    const video = await VideoModel.findByIdAndUpdate(
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (!video.saves.includes(viewerId)) {
+      return res
+        .status(400)
+        .json({ message: 'You have not saved this video yet.' });
+    }
+
+    await VideoModel.findByIdAndUpdate(
       req.params.id,
       {
         $pull: { saves: viewerId },
@@ -239,7 +327,7 @@ router.patch('/removeSave/:id', async (req, res) => {
       { new: true }
     );
 
-    const viewer = await UserModel.findByIdAndUpdate(
+    await UserModel.findByIdAndUpdate(
       viewerId,
       {
         $pull: { savedVideos: video._id },
@@ -247,57 +335,7 @@ router.patch('/removeSave/:id', async (req, res) => {
       { new: true }
     );
 
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json({ video, viewer });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-router.patch('/addComment/:id', async (req, res) => {
-  try {
-    const { commentId } = req.body;
-
-    const video = await VideoModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        $addToSet: { comments: commentId },
-        $inc: { commentsCount: 1 },
-      },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json(video);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-router.patch('/removeComment/:id', async (req, res) => {
-  try {
-    const { commentId } = req.body;
-
-    const video = await VideoModel.findByIdAndUpdate(
-      req.params.id,
-      {
-        $pull: { comments: commentId },
-        $inc: { commentsCount: -1 },
-      },
-      { new: true }
-    );
-
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    res.status(200).json(video);
+    res.status(200).json({ message: 'Video unsaved successfully.', video });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -7,14 +7,22 @@ const VideoModel = require('../models/videoModel');
 
 router.post('/createNewComment', async (req, res) => {
   try {
-    const { videoId } = req.body;
-    const newComment = await CommentModel.create(videoId);
+    const { videoId, userId, commentText } = req.body;
+    const newComment = await CommentModel.create({
+      videoId,
+      userId,
+      commentText,
+    });
 
     // add comment to list of comments in video
     const video = await VideoModel.findByIdAndUpdate(videoId, {
-      $push: { comments: newComment._id },
+      $addToSet: { comments: newComment._id },
       $inc: { commentsCount: 1 },
     });
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
 
     res.status(201).json({ newComment, video });
   } catch (error) {
@@ -22,20 +30,30 @@ router.post('/createNewComment', async (req, res) => {
   }
 });
 
-router.post('/deleteComment', async (req, res) => {
+router.delete('/deleteComment/:id', async (req, res) => {
   try {
-    const { commentId, videoId } = req.body;
+    const { videoId } = req.body;
 
-    // remove comment from videos
-    const video = await VideoModel.findByIdAndUpdate(videoId, {
-      $pull: { comments: commentId },
+    const video = await VideoModel.findById(videoId);
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const comment = await CommentModel.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    await VideoModel.findByIdAndUpdate(videoId, {
+      $pull: { comments: req.params.id },
       $inc: { commentsCount: -1 },
     });
 
-    // deleting comment from database
-    const comment = await CommentModel.findByIdAndDelete(commentId);
+    await CommentModel.findByIdAndDelete(req.params.id);
 
-    res.status(201).json({ comment, video });
+    res
+      .status(200)
+      .json({ message: 'Comment deleted successfully', comment, video });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

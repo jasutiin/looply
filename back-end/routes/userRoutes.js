@@ -130,7 +130,17 @@ router.patch('/followUser/:id', async (req, res) => {
     const { followerId } = req.body; // the user who is doing the following
     const followingId = req.params.id; // the user being followed
 
-    // update user who is being followed
+    const existingFollowing = await UserModel.findOne({
+      _id: followerId,
+      followingList: followingId,
+    });
+
+    if (existingFollowing) {
+      return res
+        .status(400)
+        .json({ message: 'You are already following this user.' });
+    }
+
     const followedUserUpdate = UserModel.findByIdAndUpdate(
       followingId,
       {
@@ -140,7 +150,6 @@ router.patch('/followUser/:id', async (req, res) => {
       { new: true }
     );
 
-    // update user who is doing the following
     const followingUserUpdate = UserModel.findByIdAndUpdate(
       followerId,
       {
@@ -155,7 +164,6 @@ router.patch('/followUser/:id', async (req, res) => {
       followingUserUpdate,
     ]);
 
-    // checking if one of the users don't exist
     if (!followedUser || !followingUser) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -172,7 +180,17 @@ router.patch('/unfollowUser/:id', async (req, res) => {
     const { unfollowerId } = req.body; // the user who is unfollowing
     const unfollowedId = req.params.id; // the user being unfollowed
 
-    // update user who is being unfollowed
+    const existingFollowing = await UserModel.findOne({
+      _id: unfollowerId,
+      followingList: unfollowedId,
+    });
+
+    if (!existingFollowing) {
+      return res
+        .status(400)
+        .json({ message: 'You are not following this user.' });
+    }
+
     const unfollowedUserUpdate = UserModel.findByIdAndUpdate(
       unfollowedId,
       {
@@ -182,7 +200,6 @@ router.patch('/unfollowUser/:id', async (req, res) => {
       { new: true }
     );
 
-    // update the user who is unfollowing
     const unfollowerUserUpdate = UserModel.findByIdAndUpdate(
       unfollowerId,
       {
@@ -197,7 +214,6 @@ router.patch('/unfollowUser/:id', async (req, res) => {
       unfollowerUserUpdate,
     ]);
 
-    // checking if one of the users don't exist
     if (!unfollowedUser || !unfollowerUser) {
       return res.status(404).json({ message: 'User not found' });
     }
