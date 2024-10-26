@@ -40,6 +40,28 @@ router.get('/getUser/:id', async (req, res) => {
   }
 });
 
+router.post('/findUserByEmail', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const { password, ...userData } = user.toObject();
+    return res.status(200).json(userData);
+  } catch (error) {
+    console.error('Error finding user:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 router.patch('/updateName/:id', async (req, res) => {
   try {
     const { name } = req.body;

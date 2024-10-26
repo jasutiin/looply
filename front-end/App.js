@@ -10,6 +10,8 @@ import Home from './screens/Home';
 import Profile from './screens/Profile';
 import Post from './screens/Post';
 
+import { COLORS } from './constants/constants';
+
 const Tab = createBottomTabNavigator();
 
 function HomeHeaderTitle() {
@@ -34,7 +36,8 @@ export default function App() {
             tabBarActiveTintColor: 'white',
             tabBarStyle: {
               backgroundColor: 'black',
-              borderTopColor: 'grey',
+              borderTopColor:
+                route.name === 'Profile' ? COLORS.darkModeBackground : 'grey',
             },
           })}
         >
@@ -69,7 +72,7 @@ export default function App() {
               headerTitleAlign: 'center',
               headerTintColor: 'white',
               headerStyle: {
-                backgroundColor: '#121212',
+                backgroundColor: COLORS.darkModeBackground,
                 shadowColor: 'transparent',
                 elevation: 0,
               },

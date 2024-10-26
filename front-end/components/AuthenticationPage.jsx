@@ -4,9 +4,6 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 const windowWidth = Dimensions.get('window').width;
 
 function AuthenticationPage({ navigation }) {
-  function Test() {
-    console.log('hello');
-  }
   return (
     <View style={styles.container}>
       <View style={styles.login}>

@@ -54,6 +54,27 @@ function Profile() {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
+          animationEnabled: true,
+          cardStyle: { backgroundColor: '#121212' },
+          cardStyleInterpolator: ({ current }) => ({
+            cardStyle: {
+              opacity: current.progress,
+            },
+          }),
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 100,
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 100,
+              },
+            },
+          },
         }}
       >
         <Stack.Screen name="Authentication" component={AuthenticationPage} />

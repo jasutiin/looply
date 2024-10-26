@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import VideoItem from '../components/VideoItem';
 import { Dimensions } from 'react-native';
 import axios from 'axios';
-import { ADDR } from '@env';
 
 const windowHeight = Dimensions.get('window').height;
 
