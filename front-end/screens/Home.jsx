@@ -1,8 +1,8 @@
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
 import { useState, useEffect } from 'react';
-import VideoItem from '../components/VideoItem';
-import { Dimensions } from 'react-native';
 import axios from 'axios';
+
+import VideoItem from '../components/VideoItem';
 
 const windowHeight = Dimensions.get('window').height;
 

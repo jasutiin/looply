@@ -1,24 +1,19 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Image,
-  Dimensions,
-} from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import AuthenticationPage from '../components/AuthenticationPage';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Login from '../components/Login';
-import Signup from '../components/Signup';
+import { useContext } from 'react';
+
+import Authentication from './Authentication';
+import Login from './Login';
+import Signup from './Signup';
+import UserContext from '../components/UserProvider';
 
 const windowWidth = Dimensions.get('window').width;
-
-signup = false;
 const Stack = createStackNavigator();
 
 function Profile() {
-  if (signup) {
+  const { user, setUser } = useContext(UserContext);
+
+  if (user._id) {
     return (
       <View style={styles.container}>
         <View style={styles.profileContainer}>
@@ -28,19 +23,19 @@ function Profile() {
               source={require('../assets/profile_pic.png')}
             />
           </View>
-          <Text style={styles.userHandle}>@jasutiin</Text>
+          <Text style={styles.userHandle}>@{user.username}</Text>
           <View style={styles.userInfo}>
             <View style={styles.infoContainer}>
-              <Text style={styles.metricText}>1,560</Text>
+              <Text style={styles.metricText}>{user.followingCount}</Text>
               <Text style={styles.text}>Following</Text>
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.metricText}>789</Text>
-              <Text style={styles.text}>Following</Text>
+              <Text style={styles.metricText}>{user.followersCount}</Text>
+              <Text style={styles.text}>Followers</Text>
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.metricText}>52.6K</Text>
-              <Text style={styles.text}>Following</Text>
+              <Text style={styles.metricText}>{user.likesCount}</Text>
+              <Text style={styles.text}>Likes</Text>
             </View>
           </View>
         </View>
@@ -77,7 +72,7 @@ function Profile() {
           },
         }}
       >
-        <Stack.Screen name="Authentication" component={AuthenticationPage} />
+        <Stack.Screen name="Authentication" component={Authentication} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
       </Stack.Navigator>

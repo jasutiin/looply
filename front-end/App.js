@@ -9,6 +9,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Home from './screens/Home';
 import Profile from './screens/Profile';
 import Post from './screens/Post';
+import { UserProvider } from './components/UserProvider';
 
 import { COLORS } from './constants/constants';
 
@@ -20,16 +21,13 @@ function HomeHeaderTitle() {
       <Pressable>
         <Text style={styles.headerText}>For You</Text>
       </Pressable>
-      <Pressable>
-        <Text style={styles.headerText}>Following</Text>
-      </Pressable>
     </View>
   );
 }
 
 export default function App() {
   return (
-    <>
+    <UserProvider>
       <NavigationContainer style={styles.container}>
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -37,7 +35,9 @@ export default function App() {
             tabBarStyle: {
               backgroundColor: 'black',
               borderTopColor:
-                route.name === 'Profile' ? COLORS.darkModeBackground : 'grey',
+                route.name === 'Profile' || route.name === 'Post'
+                  ? COLORS.darkModeBackground
+                  : 'grey',
             },
           })}
         >
@@ -58,9 +58,16 @@ export default function App() {
             name="Post"
             component={Post}
             options={{
-              headerTransparent: true,
+              headerTransparent: false,
+              headerTitleAlign: 'center',
+              headerTintColor: 'white',
+              headerStyle: {
+                backgroundColor: COLORS.darkModeBackground,
+                shadowColor: 'transparent',
+                elevation: 0,
+              },
               tabBarIcon: ({ color, size }) => (
-                <FontAwesome6 name="plus-square" color={color} size={26} />
+                <FontAwesome6 name="plus-square" color={color} size={22} />
               ),
             }}
           />
@@ -84,7 +91,7 @@ export default function App() {
         </Tab.Navigator>
       </NavigationContainer>
       <StatusBar style="light" />
-    </>
+    </UserProvider>
   );
 }
 

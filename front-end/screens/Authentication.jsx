@@ -3,7 +3,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const windowWidth = Dimensions.get('window').width;
 
-function AuthenticationPage({ navigation }) {
+function Authentication({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.login}>
@@ -113,4 +113,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AuthenticationPage;
+export default Authentication;
