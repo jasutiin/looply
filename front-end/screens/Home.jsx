@@ -1,13 +1,15 @@
 import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
 import VideoItem from '../components/VideoItem';
+import UserContext from '../components/UserProvider';
 
 const windowHeight = Dimensions.get('window').height;
 
 function Home() {
   const [videoList, setVideoList] = useState([]);
+  const { user, setUser } = useContext(UserContext);
 
   const getSixVideos = async () => {
     const arr = [];

@@ -11,7 +11,7 @@ const windowWidth = Dimensions.get('window').width;
 const Stack = createStackNavigator();
 
 function Profile() {
-  const { user, setUser } = useContext(UserContext);
+  const [user, setUser] = useContext(UserContext);
 
   if (user._id) {
     return (

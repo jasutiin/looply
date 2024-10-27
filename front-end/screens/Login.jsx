@@ -14,7 +14,7 @@ import UserContext from '../components/UserProvider';
 function Login({ navigation }) {
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
-  const { user, setUser } = useContext(UserContext);
+  const [user, setUser] = useContext(UserContext);
 
   function validateInputs() {
     const errors = {};
